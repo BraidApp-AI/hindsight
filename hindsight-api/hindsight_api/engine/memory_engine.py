@@ -679,7 +679,12 @@ class MemoryEngine(MemoryEngineInterface):
                 success=True,
             )
             try:
-                await self._operation_validator.on_mental_model_refresh_complete(result_ctx)
+                await asyncio.wait_for(
+                    self._operation_validator.on_mental_model_refresh_complete(result_ctx),
+                    timeout=5.0
+                )
+            except asyncio.TimeoutError:
+                logger.warning(f"Post-mental-model-refresh hook timed out after 5s (non-fatal)")
             except Exception as hook_err:
                 logger.warning(f"Post-mental-model-refresh hook error (non-fatal): {hook_err}")
 
